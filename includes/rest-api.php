@@ -12,7 +12,7 @@ class REST_API
     }
     public function register_routes()
     {
-        register_rest_route('wp-react-connect/v1', '/hello', array(
+        register_rest_route('wp-react-connect/v1', '/store-settings', array(
             'methods' => 'GET',
             'callback' => array($this, 'hello_endpoint'),
         ));
