@@ -7,6 +7,7 @@
  * Author: Fardin Ahmed
  * Author URI: https://github.com/devfardin
  * License: GPL2
+ * Requires Plugins: woocommerce
  */
 
 if (!defined('ABSPATH')) {
@@ -29,6 +30,9 @@ class WP_REACT_CONNECTOR
     {
         $this->loadDepandancy();
         $this->init();
+        $this->enqueueStyles();
+
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_media_scripts'));
     }
 
     // Loade all depandancy files
@@ -37,6 +41,7 @@ class WP_REACT_CONNECTOR
         require_once WP_REACT_CONNECTOR_PLUGIN_PATH . 'includes/woocommerce-checkout.php';
         require_once WP_REACT_CONNECTOR_PLUGIN_PATH . 'includes/rest-api.php';
         require_once WP_REACT_CONNECTOR_PLUGIN_PATH . 'includes/custom-settings.php';
+        require_once WP_REACT_CONNECTOR_PLUGIN_PATH . 'includes/enable-cors.php';
     }
 
     public function init()
@@ -45,13 +50,20 @@ class WP_REACT_CONNECTOR
         new WOOCOMMERCE_CHECKOUT();
         new REST_API();
         new CUSTOM_SETTINGS();
+        new ENABLE_CORS();
+    }
+    // enqueue all style 
+    public function enqueueStyles()
+    {
+        wp_enqueue_style('wp-react-connector-style', WP_REACT_CONNECTOR_PLUGIN_URL . 'assets/css/admin.css', array(), WP_REACT_CONNECTOR_VERSION, 'all');
+    }
+    public function enqueue_media_scripts($hook)
+    {
+        if ($hook !== 'toplevel_page_react-settings') {
+            return;
+        }
+        wp_enqueue_script('media-upload_script', WP_REACT_CONNECTOR_PLUGIN_URL . 'assets/js/admin.js', ['jquery'], WP_REACT_CONNECTOR_VERSION, true);
+        wp_enqueue_media();
     }
 }
 new WP_REACT_CONNECTOR();
-
-
-add_action('woocommerce_checkout_create_order', function ($order) {
-    if (!$order->get_meta('order_origin')) {
-        $order->update_meta_data('order_origin', 'Unknown');
-    }
-});
